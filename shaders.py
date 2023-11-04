@@ -2,6 +2,11 @@
 #en un nuevo lenguaje llamado GLSL
 #(Graphics Library Shaders Language)
 
+
+#-----------------------------------
+#Vertex Shaders
+#-----------------------------------
+
 vertex_shader= '''
 #version 450 core
 
@@ -84,6 +89,11 @@ void main()
 }
 '''
 
+#-----------------------------------
+#Fragment Shaders
+#-----------------------------------
+
+
 fragment_shader = '''
 #version 450 core
 
@@ -145,6 +155,39 @@ void main()
     fragColor = texture(tex, UVs) * intensity;
 }
 '''
+
+example_shader = '''
+#version 450 core
+
+in vec3 outNormals;
+
+uniform float time;
+
+out vec4 fragColor;
+
+void main()
+{
+  float theta = time*2.0;
+  
+  vec3 dir1 = vec3(cos(theta),0,sin(theta)); 
+  vec3 dir2 = vec3(sin(theta),0,cos(theta));
+  vec3 dir3 = vec3(sin(theta),cos(theta),0);
+  vec3 dir4 = vec3(0,cos(theta),tan(theta));
+  
+  float diffuse1 = pow(dot(outNormals,dir1),2.0);
+  float diffuse2 = pow(dot(outNormals,dir2),0.75);
+  float diffuse3 = pow(dot(outNormals,dir3),1.0);
+  float diffuse4 = pow(dot(outNormals,dir4),1.5);
+  
+  vec3 col1 = diffuse1 * vec3(0.25,0.65,0.28);
+  vec3 col2 = diffuse2 * vec3(0.28,0.69,0.48);
+  vec3 col3 = diffuse3 * vec3(0.98,0.24,0.15);
+  vec3 col4 = diffuse4 * vec3(0.25,0.49,0.48);
+  
+  fragColor = vec4(col1 + col2 + col3 + col4, 1.0);
+}
+'''
+
 
 #vec4 newPos = vec4(position.x, position.y + sin(time + position.x)/2, position.z, 1.0);
 """ layout(binding = 0) uniform sampler2D tex;
