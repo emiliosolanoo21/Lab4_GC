@@ -301,13 +301,15 @@ vec3 color() {
   
     vec3 color = vec3(0.0,0.0,0.0);
   
-    if( abs(mod( abs(outPosition.x), abs(.2 * cos(time * 4) )   )) < .1){
-        color.x = 1.0;
+    if( abs(mod( abs(outPosition.x), abs(.2 * sin(time) )   )) < .1){
+        color.x = 0.45;    
+        color.z = 0.86;
     }
   
   
-    if( abs(mod(outPosition.y, .2 * cos(time * 5 + 0.5))) < .1){
-        color.z = 1.0;
+    if( abs(mod(outPosition.y, .2 * sin(time * 2))) < .1){  
+        color.y = 0.78;
+        color.z = 0.45;
     }
 
     return color;
