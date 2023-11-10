@@ -16,7 +16,7 @@ clock = pygame.time.Clock()
 
 rend = Renderer(screen)
 
-rend.setShaders(vertex_shader, example_shader)
+rend.setShaders(complex_shader, fragment_shader)
 
 #---------------------------------------------------------------
 #Montaje de figuras
@@ -43,12 +43,13 @@ while isRunning:
                 rend.toggleFilledMode()
                 
             elif event.key == pygame.K_1:
-                rend.setShaders(vertex_shader, fragment_shader)
+                rend.setShaders(complex_shader, chess_shader)
             elif event.key == pygame.K_2:
-                rend.setShaders(vertex_shader, gourad_shader)
+                rend.setShaders(complex_shader, golden_shader)
             elif event.key == pygame.K_3:
-                rend.setShaders(vertex_shader, toon_shader)
-            
+                rend.setShaders(complex_shader, disco_shader)
+            elif event.key == pygame.K_4:
+                rend.setShaders(complex_shader, pattern_shader)            
 
     #5 unidades por segundo
     if keys[K_d]:
@@ -61,7 +62,7 @@ while isRunning:
         rend.camPosition.y -= 5 * deltaTime
          
     elif keys[K_s]:
-        rend.camPosition.y+= 5 * deltaTime
+        rend.camPosition.y += 5 * deltaTime
             
     if keys[K_q]:
         rend.camPosition.z += 5 * deltaTime
@@ -69,13 +70,13 @@ while isRunning:
     elif keys[K_e]:
         rend.camPosition.z -= 5 * deltaTime
         
-    #obj1.rotation.y += 45 * deltaTime
+    obj1.rotation.y += 45 * deltaTime
     
     if keys[K_RIGHT]:
         obj1.rotation.y += 45 * deltaTime 
          
     elif keys[K_LEFT]:
-        obj1.rotation.y -= 45 * deltaTime #135 con rotacion
+        obj1.rotation.y -= 135 * deltaTime #135 con rotacion constante
         
     if keys[K_f]:
         if rend.fatness <1.0:

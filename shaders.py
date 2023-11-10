@@ -33,6 +33,33 @@ void main()
 }
 '''
 
+complex_shader= '''
+#version 450 core
+
+layout(location=0) in vec3 position;
+layout(location=1) in vec2 texCoords;
+layout(location=2) in vec3 normals;
+
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+
+out vec3 outNormals;
+out vec3 worldPos;
+out vec3 outPosition;
+out vec2 UVs;
+
+void main()
+{   
+    outNormals = normalize(modelMatrix * vec4(normals, 1.0)).xyz;
+    vec4 pos = viewMatrix * vec4(position, 1.0);
+    worldPos = pos.xyz;
+    outPosition = position;
+    UVs = texCoords;
+    gl_Position = projectionMatrix * modelMatrix * pos;
+}
+'''
+
 vibing_shader= '''
 #version 450 core
 
@@ -92,7 +119,6 @@ void main()
 #-----------------------------------
 #Fragment Shaders
 #-----------------------------------
-
 
 fragment_shader = '''
 #version 450 core
@@ -156,39 +182,144 @@ void main()
 }
 '''
 
-example_shader = '''
+chess_shader = '''
 #version 450 core
 
+layout(binding = 0) uniform sampler2D tex;
+
 in vec3 outNormals;
+in vec3 worldPos;
+in vec3 outPosition;
+
+out vec4 fragColor;
+
+float pulse(float val, float dst) {
+    return floor(mod(val*dst,1.0)+.5);
+}
+
+void main()
+{
+    vec3 dir = vec3(0,1,0);
+  
+    vec3 currentPos = outPosition;
+  
+    const float f = 5.0;
+
+    float bright = pulse(currentPos.x,f) + pulse(currentPos.y,f);
+
+    vec3 color = mod(bright,2.0) > .5 ? vec3(1,1,1) : vec3(0.3,0.3,0.3); 
+
+    float diffuse = .95 + dot(outNormals,dir);
+    fragColor = vec4(diffuse * color, 1.0);
+}
+'''
+
+golden_shader = '''
+#version 450 core
+
+layout(binding = 0) uniform sampler2D tex;
+
+in vec3 outNormals;
+in vec3 worldPos;
+in vec3 outPosition;
 
 uniform float time;
 
 out vec4 fragColor;
 
+vec3 diffuse = vec3(.1,.1,.1);
+
+vec3 ambient = vec3(.83, .62, .06);
+
+vec3 specular = vec3(.05,.05,.05);
+
+float s = 20.0;
+
+vec3 camera = vec3(0.0, 0.0, 1.0);
+
+vec3 phong(in vec3 light)
+{
+  
+  float diffuseWeight =  max( dot(light, outNormals) , 0.0) ;
+  vec3 toEye = normalize(camera - worldPos);
+  vec3 reflective = reflect(-light, outNormals);
+  float sWeight = pow(max(dot(reflective, toEye), 0.0), s);
+  return ambient + diffuseWeight * diffuse + specular * sWeight;
+}
+
 void main()
 {
-  float theta = time*2.0;
-  
-  vec3 dir1 = vec3(cos(theta),0,sin(theta)); 
-  vec3 dir2 = vec3(sin(theta),0,cos(theta));
-  vec3 dir3 = vec3(sin(theta),cos(theta),0);
-  vec3 dir4 = vec3(0,cos(theta),tan(theta));
-  
-  float diffuse1 = pow(dot(outNormals,dir1),2.0);
-  float diffuse2 = pow(dot(outNormals,dir2),0.75);
-  float diffuse3 = pow(dot(outNormals,dir3),1.0);
-  float diffuse4 = pow(dot(outNormals,dir4),1.5);
-  
-  vec3 col1 = diffuse1 * vec3(0.25,0.65,0.28);
-  vec3 col2 = diffuse2 * vec3(0.28,0.69,0.48);
-  vec3 col3 = diffuse3 * vec3(0.98,0.24,0.15);
-  vec3 col4 = diffuse4 * vec3(0.25,0.49,0.48);
-  
-  fragColor = vec4(col1 + col2 + col3 + col4, 1.0);
+    vec3 light = vec3(0.0, 1.2, 0.0);
+    fragColor = vec4(phong(light), 1.0);
 }
 '''
 
+disco_shader = '''
+#version 450 core
 
+layout(binding = 0) uniform sampler2D tex;
+
+in vec3 outNormals;
+in vec3 worldPos;
+in vec3 outPosition;
+
+uniform float time;
+
+out vec4 fragColor;
+
+vec3 color() {
+  
+    vec3 color = vec3(0.0, 0.0, 0.0);
+  
+    color.x = sin(time * 50.0) * outPosition.x;
+    color.y = cos(time * 20.0) * outPosition.y;
+    color.z =  sin(time * 50.0) * cos(time * 20.0);
+  
+    return color;
+}
+
+void main()
+{
+  fragColor = vec4(color(), 1.0);
+}
+'''
+
+pattern_shader = '''
+#version 450 core
+
+layout(binding = 0) uniform sampler2D tex;
+
+in vec3 outNormals;
+in vec3 worldPos;
+in vec3 outPosition;
+
+uniform float time;
+
+out vec4 fragColor;
+
+vec3 color() {
+  
+    vec3 color = vec3(0.0,0.0,0.0);
+  
+    if( abs(mod( abs(outPosition.x), abs(.2 * cos(time * 4) )   )) < .1){
+        color.x = 1.0;
+    }
+  
+  
+    if( abs(mod(outPosition.y, .2 * cos(time * 5 + 0.5))) < .1){
+        color.z = 1.0;
+    }
+
+    return color;
+}
+
+void main()
+{
+    fragColor = vec4(color(), 1.0);
+}
+'''
+
+#-----------------------------------------------------------------------------------------
 #vec4 newPos = vec4(position.x, position.y + sin(time + position.x)/2, position.z, 1.0);
 """ layout(binding = 0) uniform sampler2D tex;
 
